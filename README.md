@@ -22,9 +22,9 @@ The way I use it and the resulting design may not fit your use-case.
 Public and protected members have inline KDoc available, but basic
 usage should be learned from this document.
 
-`TODO Note about including source jar`
+Online Dokka-generated reference can be found [here](https://chainfire.github.io/kotlin-js-threads/-threads/index.html).
 
-`TODO Link to dokka-generated reference`
+`TODO Note about including source jar`
 
 ## Browser support
 
@@ -72,7 +72,7 @@ class.
 
 Under the hood, it attemps to determine which scripts are needed, and loads
 these and itself into the worker thread (which scripts to load can be 
-manually overridden using [ThreadManager.configureImports](TODO)).
+manually overridden using [ThreadManager.configureImports](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread-manager/configure-imports.html)).
 It then arrives at your module's *main* just as it would in the browser. To
 switch to thread processing a single call is needed:
 
@@ -128,9 +128,9 @@ but both more correct and more compatible.
 
 This library provides three similar basic thread building blocks, all based on `Thread<Args, Result>`:
 
-* [SyncThread<Args, Result>](TODO), the simplest variant, [run](TODO) is called with *Args* parameters and returns *Result*
-* [AsyncThread<Args, Result>](TODO), supports suspending calls, but still ends the thread when [run](TODO) returns
-* [ComplexThread<Args, Result>](TODO), supports all constructs inside [run](TODO), but [postResult](TODO) and/or [close](TODO) must be called manually
+* [SyncThread<Args, Result>](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-sync-thread/index.html), the simplest variant, [run](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-sync-thread/run.html) is called with *Args* parameters and returns *Result*
+* [AsyncThread<Args, Result>](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-async-thread/index.html), supports suspending calls, but still ends the thread when [run](Thttps://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-async-thread/run.html) returns
+* [ComplexThread<Args, Result>](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-complex-thread/index.html), supports all constructs inside [run](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-complex-thread/run.html), but [postResult](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/post-result.html) and/or [close](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/close.html) must be called manually
 
 #### Args and Result
 
@@ -234,7 +234,7 @@ Note that both `Args` and `Result` can both always be null.
 
 ### Starting threads
 
-After creating a thread object, you launch it by calling the [start](TODO)
+After creating a thread object, you launch it by calling the [start](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/start.html)
 extension function, with the arguments of class `Args` (or null) as the
 first parameter.
 
@@ -276,11 +276,11 @@ fun main() {
 
 ### ThreadScheduler
 
-As starting threads is slow, [ThreadScheduler](TODO)
+As starting threads is slow, [ThreadScheduler](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread-scheduler/index.html)
 is provided to manage your threads as if they were tasks. You can create one 
 (or multiple) to setup thread pools. 
 
-To use the scheduler, pass it to [start](TODO)
+To use the scheduler, pass it to [start](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/start.html)
 with the `threadScheduler` argument. A `schedulePriority` argument is also
 available, lower values execute first. 
 
@@ -318,8 +318,8 @@ but it does occasionally come in handy for debugging purposes.
 ### Exceptions
 
 Uncaught exceptions in your threads are logged to console inside the thread,
-and passed back to the parent thread by message, [state](TODO) 
-is set to `State.ERROR`, and [throwable](TODO)
+and passed back to the parent thread by message, [state](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/index.html#eu.chainfire.kjs.threads/Thread/state/#/PointingToDeclaration/) 
+is set to `State.ERROR`, and [throwable](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/index.html#eu.chainfire.kjs.threads/Thread/throwable/#/PointingToDeclaration/)
 is set with the exception.
 
 Any unresolved promises will reject with the exception. You can use the 
@@ -341,20 +341,19 @@ This document does not cover all possible functionality, reading the source
 (which isn't all that long) is always recommended.
 
 You may want to pass your own messages between the parent and child thread.
-Use [messageReceiver](TODO)
-to read incoming messages, and [post](TODO) 
+Use [messageReceiver](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/index.html#eu.chainfire.kjs.threads/Thread/messageReceiver/#/PointingToDeclaration/)
+to read incoming messages, and [post](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/post.html) 
 to send them. Keep in mind that due to how the JavaScript loop works you may
 not receive messages until the thread becomes idle, and may need to
 call [yield](TODO) 
 or [sleep](TODO)
 to circumvent this. 
 
-When [close](TODO)
+When [close](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/close.html)
 is called in the parent thread (without `immediate = true` argument), a
-[SyncThread<Args, Result>](TODO)
+[SyncThread<Args, Result>](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-sync-thread/index.html)
 will close as soon as possible. The other variants depend on you to detect
-[State.CLOSING](TODO).
-You will also receive a null message from [messageReceiver](TODO)
+`State.CLOSING`. You will also receive a null message from [messageReceiver](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/index.html#eu.chainfire.kjs.threads/Thread/messageReceiver/#/PointingToDeclaration/)
 when that state is set.
 
 ## Related packages
