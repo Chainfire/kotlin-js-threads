@@ -126,6 +126,12 @@ but both more correct and more compatible.
 
 ### Declarations
 
+The easiest way to import everything is:
+
+```
+import eu.chainfire.kjs.threads.*
+```
+
 This library provides three similar basic thread building blocks, all based on `Thread<Args, Result>`:
 
 * [SyncThread<Args, Result>](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-sync-thread/index.html), the simplest variant, [run](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-sync-thread/run.html) is called with *Args* parameters and returns *Result*
