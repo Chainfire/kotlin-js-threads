@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "eu.chainfire"
-version = "1.0-SNAPSHOT"
+version = "1.0.0"
 
 repositories {
     maven("https://dl.bintray.com/kotlin/kotlin-eap")
