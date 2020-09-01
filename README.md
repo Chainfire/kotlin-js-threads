@@ -153,10 +153,6 @@ as type for `Args` or `Result`, so if you want to use your own plain
 JavaScript objects you have to use a wrapper such as `DynamicArgs` in the
 example below.
 
-TODO did dynamic work directly? TestThread8
-TODO test these
-TODO test array
-
 Examples:
 
 ```
@@ -215,7 +211,7 @@ class MyAsyncThread : AsyncThread<Int, Int>() {
 class MyComplexThread : ComplexThread<Int, Int>() {
     override suspend fun run(args: Int?) {
         if (args == null) {
-            postResult(-1, true)
+            postResult(null, true)
             return
         }
 
@@ -331,10 +327,6 @@ message, but if it fails it may fall back to `RuntimeException`, `Error` or
 `Throwable` class. Cause and stacktrace are always lost, which can make
 debugging a bit of an effort.
 
-### Complete basic example
-
-TODO
-
 ## Further reading
 
 This document does not cover all possible functionality, reading the source
@@ -345,8 +337,8 @@ Use [messageReceiver](https://chainfire.github.io/kotlin-js-threads/-threads/eu.
 to read incoming messages, and [post](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/post.html) 
 to send them. Keep in mind that due to how the JavaScript loop works you may
 not receive messages until the thread becomes idle, and may need to
-call [yield](TODO) 
-or [sleep](TODO)
+call [yield](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/-companion/yield.html) 
+or [sleep](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/-companion/sleep.html)
 to circumvent this. 
 
 When [close](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/close.html)
