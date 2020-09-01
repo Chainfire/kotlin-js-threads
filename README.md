@@ -153,7 +153,7 @@ primitives *including* `dynamic`, and basic Kotlin classes (single *or*
 (small) Array<\*>). However, these sub-objects and sub-array-of-objects need
 to be registered for reconstruction.
 
-Avoid object hierarchies for `Args` and `Result`, do not use delegates are 
+Avoid object hierarchies for `Args` and `Result`, do not use delegates or 
 declare functions without extensive testing (with the less forgiving IR
 compiler).
 
