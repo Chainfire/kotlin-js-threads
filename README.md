@@ -24,7 +24,12 @@ usage should be learned from this document.
 
 Online Dokka-generated reference can be found [here](https://chainfire.github.io/kotlin-js-threads/-threads/index.html).
 
-`TODO Note about including source jar`
+IDEA regularly doesn't automatically include the sources jar even though it
+does download it, and as a javadoc jar isn't provided, this means you don't 
+get inline documentation. To solve this, after adding the dependency on this
+library and loading gradle changes, go to *File*, *Project Structure*, 
+*Libraries*, and add the *\*-sources.jar* file manually. This will enable 
+popup documentation (Ctrl+Q) and allow you to click through declarations to their source.
 
 ## Browser support
 
