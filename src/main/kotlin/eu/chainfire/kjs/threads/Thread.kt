@@ -743,6 +743,6 @@ abstract class Thread<Args, Result> {
  * @param schedulePriority Priority for [Thread] if using [ThreadScheduler]
  * @return This [Thread]
  */
-inline fun <reified T : Thread<Args, Result>, reified Args, reified Result> T.start(args: Args? = null, transfers: Array<dynamic>? = null, threadScheduler: ThreadScheduler? = null, schedulePriority: Int = 1): T {
-    return start(ThreadManager.copyCastClassName(Args::class), ThreadManager.copyCastClassName(Result::class), args, transfers, threadScheduler, schedulePriority).unsafeCast<T>()
+inline fun <reified T : Thread<Args, Result>, reified Args, reified Result> T.start(args: Args? = null, transfers: Array<dynamic>? = null, threadScheduler: ThreadScheduler? = null, schedulePriority: Int = 10): T {
+    return start(CopyCast.classNameFor(Args::class), CopyCast.classNameFor(Result::class), args, transfers, threadScheduler, schedulePriority).unsafeCast<T>()
 }
