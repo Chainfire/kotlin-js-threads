@@ -58,6 +58,12 @@ abstract class Thread<Args, Result> {
         fun isMainThread(scopedEval: ((String) -> dynamic)? = null): Boolean {
             return ThreadManager.isMainThread(scopedEval)
         }
+
+        /**
+         * See [ThreadManager.threadId]
+         */
+        val id: Int
+            inline get() = ThreadManager.threadId
     }
 
     /**

@@ -31,6 +31,15 @@ object ThreadManager {
 
     private val scopedEvals: ArrayList<(String) -> dynamic> = arrayListOf({ eval(it) })
 
+    /**
+     * Current thread id. Unique for 2^20 threads, with 2^10 sub-threads each
+     */
+    var threadId: Int = -1
+
+    private var nextThreadId: Int = -1
+    private var nextThreadIdInc: Int = -1
+    private var nextThreadIdMax: Int = -1
+
     init {
         if (js("typeof document != 'undefined'").unsafeCast<Boolean>()) {
             scriptSelf = if (document.currentScript != null) document.currentScript.unsafeCast<HTMLScriptElement>().src else ""
@@ -47,6 +56,13 @@ object ThreadManager {
             scriptPrevious = js("THREAD_MANAGER_SCRIPT_PREVIOUS").unsafeCast<Array<String>>()
             importScripts = js("THREAD_MANAGER_SCRIPT_EXTRA").unsafeCast<Array<String>>()
             scriptSelf = js("THREAD_MANAGER_SCRIPT_SELF").unsafeCast<String>()
+        }
+
+        if (isMainThread()) {
+            threadId = 1
+            nextThreadIdInc = 1
+            nextThreadId = threadId + nextThreadIdInc
+            nextThreadIdMax = (1 shl 20) - 1
         }
     }
 
@@ -113,75 +129,19 @@ object ThreadManager {
     }
 
     /**
-     * Helper interface for [copyCast]
-     */
-    interface AfterCopyCast {
-        /**
-         * Called after [ThreadManager.copyCast] performed on this object
-         */
-        fun afterCopyCast()
-    }
-
-    /**
-     * Determines JavaScript class constructor name for [copyCast] purposes
-     * @param clazz Class to determine name for
-     * @return JavaScript class constructor name
-     */
-    fun copyCastClassName(clazz: KClass<*>): String? {
-        try {
-            return when {
-                js("clazz.constructor.name").unsafeCast<String>().startsWith("PrimitiveKClass") -> {
-                    // primitives can be cast directly
-                    null
-                }
-                clazz.simpleName == null -> {
-                    // external classes can be cast directly
-                    null
-                }
-                else -> {
-                    clazz.unsafeCast<KClass<Any>>().js.name
-                }
-            }
-        } catch (t: Throwable) {
-            return null
-        } catch (d: dynamic) {
-            return null
-        }
-    }
-
-    /**
-     * Instantiates class [className], copies [source] members into the new
-     * object, and calls [AfterCopyCast.afterCopyCast] on it if provided
-     * @param className Name of class to instantiate
-     * @param source JavaScript object with members to copy
-     * @return Instantiated class with members copied
-     */
-    fun <T> copyCast(className: String?, source: dynamic): T? {
-        if (className == null) return source.unsafeCast<T?>()
-        if (className == "Unit") return Unit.unsafeCast<T?>()
-        if (source == null) return null
-        eval("""
-            window._copyCast_className = className;
-            window._copyCast_source = source;
-        """)
-        val ret = scopedEval("""(function(className, source) {
-            var o = eval("new " + className + "()");
-            var k = Object.keys(source);
-            for (var i = 0; i < k.length; i++) {
-                o[k[i]] = source[k[i]];
-            } 
-            return o;
-        })(window._copyCast_className, window._copyCast_source)""").unsafeCast<T?>()
-        if (ret is AfterCopyCast) {
-            ret.afterCopyCast()
-        }
-        return ret
-    }
-
-    /**
      * Internal. Used to initiate thread run.
      */
     private fun workerMain() {
+        threadId = js("THREAD_MANAGER_ID").unsafeCast<Int>()
+        if (threadId shr 20 == 0) {
+            nextThreadIdInc = 1 shl 20
+            nextThreadId = threadId + nextThreadIdInc
+            nextThreadIdMax = threadId + ((1 shl 30) - 1)
+        } else {
+            nextThreadIdInc = 0
+            nextThreadId = 0
+            nextThreadIdMax = 0
+        }
         val self: DedicatedWorkerGlobalScope = js("workerScope").unsafeCast<DedicatedWorkerGlobalScope>()
         val t: Thread<*,*>? = scopedEval("eval(\"new \" + THREAD_MANAGER_CTOR + \"()\")").unsafeCast<Thread<*,*>?>()
         if (t == null) {
@@ -206,6 +166,11 @@ object ThreadManager {
         workerJs += "let workerScope = self;\n"
         workerJs += "let THREAD_MANAGER_CTOR = \"${thread::class.js.name}\";\n"
         workerJs += "let THREAD_MANAGER_CLASS = \"${thread::class.simpleName}\";\n"
+        workerJs += "let THREAD_MANAGER_ID = $nextThreadId;\n"
+
+        if (nextThreadId == 0) throw RuntimeException("Run out of threadIds")
+        nextThreadId += nextThreadIdInc
+        if (nextThreadId == nextThreadIdMax) throw RuntimeException("Run out of threadIds")
 
         workerJs += "let THREAD_MANAGER_SCRIPT_PREVIOUS = ["
         if (scriptPrevious.isNotEmpty()) {

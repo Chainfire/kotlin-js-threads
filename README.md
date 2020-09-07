@@ -359,6 +359,16 @@ will close as soon as possible. The other variants depend on you to detect
 `State.CLOSING`. You will also receive a null message from [messageReceiver](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/index.html#eu.chainfire.kjs.threads/Thread/messageReceiver/#/PointingToDeclaration/)
 when that state is set.
 
+Threads *can* spawn their own sub-threads, but those sub-threads *can't*
+currently spawn their own sub-sub-threads. This is due to how
+[Thread.id](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/-companion/index.html#eu.chainfire.kjs.threads/Thread.Companion/id/#/PointingToDeclaration/)
+works. This could be much improved by using a *SharedArrayBuffer*/*Atomics*
+solution, but those are not supported as widely as workers are. The
+main thread can spawn up to a million threads (not simultaneously),
+and each of those can spawn up to a thousand sub-threads.
+
+`TODO create examples for the above`
+
 ## Related packages
 
 [kotlin-js-sharedmemory](https://github.com/Chainfire/kotlin-js-sharedmemory): Kotlin/JS: External declarations related to shared memory
