@@ -233,7 +233,7 @@ class MyComplexThread : ComplexThread<Int, Int>() {
         self?.setTimeout({
             // call postResult (or close) manually to end thread
             postResult(args + 1, true)
-        })
+        }, 1000)
 
         // thread does not end here
     }
