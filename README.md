@@ -151,7 +151,10 @@ directly to a JavaScript primitive (`Int`, `Array<String>`, `Int32Array`, etc)
 a basic Kotlin class should in turn only contain *public var* of the same
 primitives *including* `dynamic`, and basic Kotlin classes (single *or* 
 (small) Array<\*>). However, these sub-objects and sub-array-of-objects need
-to be registered for reconstruction.
+to be *registered* for reconstruction using the [Thread.Args](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/-args/index.html)
+class. When registering, you *must* use *exact* types. Declaring/registering
+an object of class A, then actually using a subclass of A, will lead to an
+undefined state.
 
 Avoid object hierarchies for `Args` and `Result`, do not use delegates or 
 declare functions without extensive testing (with the less forgiving IR
@@ -350,7 +353,15 @@ to send them. Keep in mind that due to how the JavaScript loop works you may
 not receive messages until the thread becomes idle, and may need to
 call [yield](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/-companion/yield.html) 
 or [sleep](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/-companion/sleep.html)
-to circumvent this. 
+to circumvent this.
+
+While for `Args` and `Result` [CopyCast](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-copy-cast/index.html)
+is used for you automatically, when passing your own messages around you may
+need to [wrap](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-copy-cast/wrap.html)
+`args: dynamic` yourself before you post them and [unwrap](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-copy-cast/unwrap.html)
+them when receiving. You can use the [Thread.Args](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/-args/index.html)
+class as a base here as well. Or you can just use `dynamic` objects, and/or
+pass primitive JavaScript types around, whichever you prefer.
 
 When [close](https://chainfire.github.io/kotlin-js-threads/-threads/eu.chainfire.kjs.threads/-thread/close.html)
 is called in the parent thread (without `immediate = true` argument), a
@@ -383,7 +394,7 @@ repositories {
 }
 
 dependencies {
-    implementation("eu.chainfire:kotlin-js-threads:1.0.0")
+    implementation("eu.chainfire:kotlin-js-threads:1.0.1")
 }
 ```
 

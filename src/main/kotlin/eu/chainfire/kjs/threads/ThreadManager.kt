@@ -12,7 +12,6 @@ import org.w3c.dom.asList
 import org.w3c.dom.url.URL
 import org.w3c.files.Blob
 import org.w3c.files.BlobPropertyBag
-import kotlin.reflect.KClass
 
 /**
  * Helper class that manages [Thread] creation and execution, aside from

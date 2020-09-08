@@ -69,17 +69,24 @@ abstract class Thread<Args, Result> {
     /**
      * Helper class to reconstruct thread argument objects in other thread
      */
-    abstract class Args : ThreadManager.AfterCopyCast {
+    open class Args : CopyCast.OnCopyCast {
+        companion object {
+            // this never conflicts, don't pollute each object's space
+            var isCopyCastBefore: Boolean = true
+                private set
+        }
+
         /**
          * Register an object var property for reconstruction, call from
          * [register] only
          */
-        protected inline fun <reified T> obj(property: KMutableProperty0<T>) {
+        inline fun <reified T> obj(property: KMutableProperty0<T>) {
+            if (isCopyCastBefore) return
             val o = property.get().asDynamic() ?: return
             if (o is T) return
-            val t = ThreadManager.copyCast<T>(ThreadManager.copyCastClassName(T::class), o)
+            val t = CopyCast.copyCast<T>(CopyCast.classNameFor(T::class), o)
             property.set(t!!)
-            if (t is ThreadManager.AfterCopyCast) {
+            if (t is CopyCast.OnCopyCast) {
                 t.afterCopyCast()
             }
         }
@@ -88,25 +95,32 @@ abstract class Thread<Args, Result> {
          * Register an array-of-object var property for reconstruction, call
          * from [register] only
          */
-        protected inline fun <reified T> array(property: KMutableProperty0<Array<T>>) {
+        inline fun <reified T> array(property: KMutableProperty0<Array<T>>) {
+            if (isCopyCastBefore) return
             val o = property.get().asDynamic()
             for (i in 0 until o.length.unsafeCast<Int>()) {
-                val t = ThreadManager.copyCast<T>(ThreadManager.copyCastClassName(T::class), o[i])
+                val t = CopyCast.copyCast<T>(CopyCast.classNameFor(T::class), o[i])
                 o[i] = t
-                if (t is ThreadManager.AfterCopyCast) {
+                if (t is CopyCast.OnCopyCast) {
                     t.afterCopyCast()
                 }
             }
         }
 
-        final override fun afterCopyCast() {
+        override fun beforeCopyCast() {
+            isCopyCastBefore = true
+            register()
+        }
+
+        override fun afterCopyCast() {
+            isCopyCastBefore = false
             register()
         }
 
         /**
          * Call [obj] or [array] here with each var property that needs reconstructing
          */
-        protected abstract fun register()
+        protected open fun register() { }
     }
 
     /**
@@ -418,7 +432,7 @@ abstract class Thread<Args, Result> {
                         false
                     }
                     MESSAGE_RESULT_CALLBACK -> {
-                        result = ThreadManager.copyCast(resultClassName, event.args)
+                        result = CopyCast.unwrap(event.args)
                         false
                     }
                     else -> {
@@ -542,7 +556,7 @@ abstract class Thread<Args, Result> {
     protected fun postResult(result: Result?, andClose: Boolean = true, transfers: Array<dynamic>? = null) {
         if (!resultPosted) {
             resultPosted = true
-            post(MESSAGE_RESULT_CALLBACK, result, transfers)
+            post(MESSAGE_RESULT_CALLBACK, CopyCast.wrap(result, resultClassName), transfers)
         }
         if (andClose) close()
     }
@@ -592,7 +606,7 @@ abstract class Thread<Args, Result> {
             threadScheduler.queue(this, schedulePriority, channel.port2)
         }
         val o = js("{}")
-        o["args"] = args?.asDynamic()
+        o["args"] = CopyCast.wrap(args, argsClassName)
         o["argsClassName"] = argsClassName
         o["resultClassName"] = resultClassName
         post(MESSAGE_INIT, o, transfers)
@@ -648,7 +662,7 @@ abstract class Thread<Args, Result> {
     /** Subclass helper */
     internal inline fun runHelper(args: dynamic, postResult: Boolean = true, close: Boolean = true, runExecutor: (args: Args?) -> Result?) {
         try {
-            val ret = runExecutor(ThreadManager.copyCast(argsClassName, args))
+            val ret = runExecutor(CopyCast.unwrap(args))
             if (postResult) {
                 this.postResult(ret, close)
             } else if (close) {
