@@ -72,8 +72,8 @@ per millisecond at best.
 
 ### How the basics apply to this library
 
-This library attempts abstract workers away into the `Thread<Args, Result>`
-class.
+This library attempts to abstract workers away into the `Thread<Args, Result>`
+class and its subclasses.
 
 Under the hood, it attemps to determine which scripts are needed, and loads
 these and itself into the worker thread (which scripts to load can be 
